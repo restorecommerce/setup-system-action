@@ -1,0 +1,13 @@
+name: 'Restorecommerce System Setup'
+description: 'Greet someone and record the time'
+
+inputs:
+  backing-only:
+    description: 'Whether to setup all or only backing services'
+    required: true
+    default: 'true'
+
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
+  post: 'dist/index.js'
