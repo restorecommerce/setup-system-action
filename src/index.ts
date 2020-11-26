@@ -7,7 +7,7 @@ const system_github_repo = 'https://github.com/restorecommerce/system.git';
 
 const setup = async () => {
   try {
-    const backing = getInput('backing-only').toLowerCase() !== 'true';
+    const backing = getInput('backing-only').toLowerCase() === 'true';
 
     if (backing) {
       info('Setting up system backing services');
@@ -110,6 +110,7 @@ const post = async () => {
   }
 };
 
+console.log(process.env);
 if (!!process.env['STATE_isPost']) {
   post();
 } else {
