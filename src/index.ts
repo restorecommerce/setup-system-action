@@ -7,6 +7,9 @@ const system_github_repo = 'https://github.com/restorecommerce/system.git';
 
 const setup = async () => {
   try {
+    await exec('docker', ['version']);
+    await exec('docker-compose', ['version']);
+
     const backing = getInput('backing-only').toLowerCase() === 'true';
 
     if (backing) {
@@ -42,7 +45,6 @@ const setup = async () => {
 
     let inspect = '';
     await exec('docker', ['inspect', ...containers.trim().split('\n')], {
-      ...systemConfig,
       listeners: {
         stdout: (data: Buffer) => inspect += data.toString()
       },
@@ -57,7 +59,6 @@ const setup = async () => {
           for (let i = 0; i < start_timeout; i++) {
             let out = '';
             await exec('docker', ['inspect', inspect['Id']], {
-              ...systemConfig,
               listeners: {
                 stdout: (data: Buffer) => out += data.toString()
               },
