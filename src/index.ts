@@ -1,4 +1,4 @@
-import { getInput, setFailed, info } from '@actions/core';
+import { getInput, setFailed, info, saveState } from '@actions/core';
 import { exec } from '@actions/exec';
 import { rmRF } from '@actions/io';
 
@@ -110,8 +110,13 @@ const post = async () => {
   }
 };
 
-console.log(process.env);
-if (!!process.env['STATE_isPost']) {
+const IsPost = !!process.env['STATE_isPost'];
+
+if (!IsPost) {
+  saveState('isPost', 'true');
+}
+
+if (IsPost) {
   post();
 } else {
   setup();
