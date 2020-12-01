@@ -6,6 +6,14 @@ inputs:
     description: 'Whether to setup all or only backing services'
     required: true
     default: 'true'
+  import:
+    description: 'Whether to import data after setup'
+    required: true
+    default: 'false'
+  shutdown:
+    description: 'Services to shutdown after setup'
+    required: false
+    default: ''
 
 runs:
   using: 'node12'

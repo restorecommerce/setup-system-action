@@ -4,15 +4,18 @@ import { rmRF } from '@actions/io';
 
 const start_timeout = 100;
 const system_github_repo = 'https://github.com/restorecommerce/system.git';
+const data_github_repo = 'https://github.com/restorecommerce/data.git';
+
+const backingOnly = getInput('backing-only').toLowerCase() === 'true';
+const importData = getInput('import').toLowerCase() === 'true';
+const shutdown = getInput('shutdown').toLowerCase();
 
 const setup = async () => {
   try {
     await exec('docker', ['version']);
     await exec('docker-compose', ['version']);
 
-    const backing = getInput('backing-only').toLowerCase() === 'true';
-
-    if (backing) {
+    if (backingOnly) {
       info('Setting up system backing services');
     } else {
       info('Setting up full system stack');
@@ -25,7 +28,7 @@ const setup = async () => {
     info('Bringing up via docker-compose');
 
     let script = 'backing.bash';
-    if (!backing) {
+    if (!backingOnly) {
       script = 'all.bash';
     }
 
@@ -83,6 +86,32 @@ const setup = async () => {
     }));
 
     await exec('bash', [script, 'ps'], systemConfig);
+
+    if (importData) {
+      info('Cloning repository from: ' + data_github_repo);
+
+      await exec('git', ['clone', data_github_repo]);
+
+      info('Importing data');
+
+      // TODO Pull API key from facade-srv logs
+      await exec('node', ['import.js', '-p', 'TODO'], {
+        cwd: 'data/demo-shop',
+        input: Buffer.from('2\n')
+      });
+    }
+
+    if (shutdown) {
+      const toShutdown = shutdown.trim().split('\n').map(s => s.trim());
+
+      info('Shutting down services: ' + toShutdown.join(', '));
+
+      await exec('bash', [script, 'stop', ...toShutdown], systemConfig);
+    }
+
+    await exec('bash', [script, 'ps'], systemConfig);
+
+    info('System setup complete');
   } catch (error) {
     console.log(error);
     setFailed(error.message);
@@ -91,12 +120,10 @@ const setup = async () => {
 
 const post = async () => {
   try {
-    const backing = getInput('backing-only').toLowerCase() !== 'true';
-
     info('Shutting down via docker-compose');
 
     let script = 'backing.bash';
-    if (!backing) {
+    if (!backingOnly) {
       script = 'all.bash';
     }
 
@@ -105,6 +132,10 @@ const post = async () => {
     });
 
     await rmRF('system');
+
+    if (importData) {
+      await rmRF('data');
+    }
   } catch (error) {
     console.log(error);
     setFailed(error.message);
