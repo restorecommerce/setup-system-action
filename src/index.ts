@@ -92,6 +92,10 @@ const setup = async () => {
 
       await exec('git', ['clone', data_github_repo]);
 
+      await exec('npm', ['install'], {
+        cwd: 'data/demo-shop'
+      });
+
       info('Importing data');
 
       // TODO Pull API key from facade-srv logs
