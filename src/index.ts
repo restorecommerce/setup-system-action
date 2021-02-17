@@ -99,10 +99,14 @@ const setup = async () => {
       info('Importing data');
 
       // TODO Pull API key from facade-srv logs
-      await exec('node', ['import.js', '-p', 'TODO'], {
-        cwd: 'data/demo-shop',
-        input: Buffer.from('2\n')
-      });
+      const apiKey = 'api_key';
+      const datasets = ['master', 'identity', 'extra'];
+
+      for (let dataset of datasets) {
+        await exec('node', ['import.js', 'import', '-t', apiKey, '-j', dataset], {
+          cwd: 'data/demo-shop'
+        });
+      }
     }
 
     if (shutdown) {
