@@ -78,6 +78,15 @@ const setup = async () => {
             await new Promise(r => setTimeout(r, 1000));
           }
 
+          let containerLogs = '';
+          await exec('docker', ['logs', inspect['Name'].substr(1)], {
+            listeners: {
+              stdout: (data: Buffer) => containerLogs += data.toString()
+            },
+            silent: true
+          });
+
+          info(containerLogs);
           info(JSON.stringify(inspect));
 
           const errorMessage = 'Timed out waiting for service to start up: ' + inspect['Name'];
