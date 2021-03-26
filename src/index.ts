@@ -78,6 +78,8 @@ const setup = async () => {
             await new Promise(r => setTimeout(r, 1000));
           }
 
+          info(JSON.stringify(inspect));
+
           const errorMessage = 'Timed out waiting for service to start up: ' + inspect['Name'];
           setFailed(errorMessage);
           reject(errorMessage);
