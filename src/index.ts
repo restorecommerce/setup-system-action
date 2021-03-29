@@ -2,7 +2,7 @@ import { getInput, setFailed, info, saveState } from '@actions/core';
 import { exec } from '@actions/exec';
 import { rmRF } from '@actions/io';
 
-const start_timeout = 100;
+const start_timeout = 300;
 const system_github_repo = 'https://github.com/restorecommerce/system.git';
 const data_github_repo = 'https://github.com/restorecommerce/data.git';
 
