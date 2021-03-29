@@ -35,6 +35,7 @@ const setup = async () => {
     const systemConfig = {
       cwd: 'system/Docker-Compose'
     };
+    await exec('bash', [script, 'pull'], systemConfig);
     await exec('bash', [script, 'up', '-d'], systemConfig);
 
     let containers = '';
