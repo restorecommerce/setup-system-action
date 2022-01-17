@@ -33,7 +33,7 @@ const setup = async () => {
     }
 
     const systemConfig = {
-      cwd: 'system/Docker-Compose'
+      cwd: 'system/docker'
     };
     await exec('bash', [script, 'pull', '-q'], systemConfig);
     await exec('bash', [script, 'up', '-d'], systemConfig);
@@ -148,7 +148,7 @@ const post = async () => {
     }
 
     await exec('bash', [script, 'down'], {
-      cwd: 'system/Docker-Compose'
+      cwd: 'system/docker'
     });
 
     await rmRF('system');
