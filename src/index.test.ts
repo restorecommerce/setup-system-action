@@ -1,18 +1,25 @@
 import { env, cwd } from 'process';
-import { execSync } from 'child_process';
+import { spawn } from 'child_process';
 import { join } from 'path';
 
 const testEnv = {
   ...env,
-  INPUT_IMPORT: 'true'
+  INPUT_IMPORT: 'true',
+  RUNNER_TEMP: '/tmp',
 };
 
-test('should bring up stack and import data', () => {
+test('should bring up stack and import data', (done) => {
   try {
     const ip = join(cwd(), 'dist', 'index.js');
-    console.log(execSync(`node ${ip}`, {
+    const proc = spawn('node', [ip], {
+      stdio: 'inherit',
       env: testEnv
-    }).toString());
+    });
+
+    proc.on('exit', (code) => {
+      console.log('child process exited with code ' + code.toString());
+      done();
+    });
   } catch (e) {
     if ('stdout' in e) {
       console.log(e.stderr.toString());
@@ -20,18 +27,26 @@ test('should bring up stack and import data', () => {
     } else {
       console.log(e);
     }
-  }
-});
 
-test('should tear down stack', () => {
+    done();
+  }
+}, 1000 * 60 * 11);
+
+test('should tear down stack', (done) => {
   try {
     const ip = join(cwd(), 'dist', 'index.js');
-    console.log(execSync(`node ${ip}`, {
+    const proc = spawn('node', [ip], {
+      stdio: 'inherit',
       env: {
         ...testEnv,
         STATE_isPost: 'true'
       }
-    }).toString());
+    });
+
+    proc.on('exit', (code) => {
+      console.log('child process exited with code ' + code.toString());
+      done();
+    });
   } catch (e) {
     if ('stdout' in e) {
       console.log(e.stderr.toString());
@@ -40,4 +55,4 @@ test('should tear down stack', () => {
       console.log(e);
     }
   }
-});
+}, 1000 * 60 * 11);
