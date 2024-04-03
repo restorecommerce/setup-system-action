@@ -121,7 +121,7 @@ const waitForHealthy = async (containerName: string) => {
 const setup = async () => {
   try {
     await exec('docker', ['version']);
-    await exec('docker-compose', ['version']);
+    await exec('docker', ['compose', 'version']);
 
     if (backingOnly) {
       info('Setting up system backing services');
@@ -133,7 +133,7 @@ const setup = async () => {
 
     await exec('git', ['clone', system_github_repo]);
 
-    info('Bringing up via docker-compose');
+    info('Bringing up via docker compose');
 
     let script = 'backing.bash';
     if (!backingOnly) {
@@ -222,7 +222,7 @@ const setup = async () => {
 
 const post = async () => {
   try {
-    info('Shutting down via docker-compose');
+    info('Shutting down via docker compose');
 
     let script = 'backing.bash';
     if (!backingOnly) {
