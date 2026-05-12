@@ -1,14 +1,18 @@
 name: 'Restorecommerce System Setup'
-description: 'Greet someone and record the time'
+description: 'Launch the Restorecommerce docker compose system'
 
 inputs:
   backing-only:
     description: 'Whether to setup all or only backing services'
-    required: true
+    required: false
     default: 'true'
+  restart:
+    description: 'Whether to restart right after setup'
+    required: false
+    default: 'false'
   import:
     description: 'Whether to import data after setup'
-    required: true
+    required: false
     default: 'false'
   shutdown:
     description: 'Services to shutdown after setup'

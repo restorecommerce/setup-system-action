@@ -2,3 +2,5 @@ node_modules/
 system/
 .idea/
 data/
+dist/sourcemap-register.js
+*.js.map

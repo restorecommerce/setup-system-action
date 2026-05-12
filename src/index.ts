@@ -9,6 +9,7 @@ const system_github_repo = 'https://github.com/restorecommerce/system.git';
 const data_github_repo = 'https://github.com/restorecommerce/data.git';
 
 const backingOnly = getInput('backing-only').toLowerCase() === 'true';
+const restart = getInput('restart').toLowerCase() === 'true';
 const importData = getInput('import').toLowerCase() === 'true';
 const shutdown = getInput('shutdown').toLowerCase();
 
@@ -135,35 +136,35 @@ const setup = async () => {
 
     info('Bringing up via docker compose');
 
-    let script = 'backing.bash';
-    if (!backingOnly) {
-      script = 'all.bash';
-    }
+    const script = !backingOnly ? 'all.bash' : 'backing.bash';
 
     const systemConfig = {
       cwd: 'system/docker'
     };
     await exec('bash', [script, 'pull', '-q'], systemConfig);
     await exec('bash', [script, 'up', '-d'], systemConfig);
+    if (restart) {
+      await exec('bash', [script, 'restart'], systemConfig);
+    }
 
-    let containers = '';
+    const containers = [];
     await exec('bash', [script, 'ps', '-q'], {
       ...systemConfig,
       listeners: {
-        stdout: (data: Buffer) => containers += data.toString()
+        stdout: (data: Buffer) => containers.push(data.toString())
       },
       silent: true
     });
 
-    let inspect = '';
-    await exec('docker', ['inspect', ...containers.trim().split('\n')], {
+    const inspect = [];
+    await exec('docker', ['inspect', ...containers.join().trim().split('\n')], {
       listeners: {
-        stdout: (data: Buffer) => inspect += data.toString()
+        stdout: (data: Buffer) => inspect.push(data.toString())
       },
       silent: true
     });
 
-    const inspections = JSON.parse(inspect);
+    const inspections = JSON.parse(inspect.join());
 
     await Promise.all(inspections.map(async (inspect) => {
       const containerName = inspect['Name'].substring(1);
