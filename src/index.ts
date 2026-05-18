@@ -46,7 +46,7 @@ const isContainerHealthy = async (container: string) => {
       stdout: (data: Buffer) => out += data.toString(),
     },
     silent: true
-  }).catch(console.error);
+  }).catch(warning);
 
   const parsed = JSON.parse(out);
   if (parsed && parsed.length > 0) {
@@ -67,7 +67,7 @@ const getFacadeAPIKey = async () => {
       stderr: (data: Buffer) => out += data.toString(),
     },
     silent: true
-  }).catch(console.error);
+  }).catch(warning);
 
   const line = out.split('\n').find(line => {
     if (line.indexOf('Bootstrap API Key is') >= 0) {
@@ -222,7 +222,7 @@ const setup = async () => {
 
     info('System setup complete');
   } catch (error) {
-    console.log(error);
+    warning(error);
     setFailed(error.message);
   }
 };
@@ -246,7 +246,7 @@ const post = async () => {
       await rmRF('data');
     }
   } catch (error) {
-    console.log(error);
+    warning(error);
     setFailed(error.message);
   }
 };

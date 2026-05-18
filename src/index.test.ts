@@ -4,7 +4,8 @@ import { join } from 'path';
 
 const testEnv = {
   ...env,
-  INPUT_IMPORT: 'true',
+  INPUT_IMPORT: 'false',
+  INPUT_RESTART: 'true',
   RUNNER_TEMP: '/tmp',
 };
 
