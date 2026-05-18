@@ -1,4 +1,4 @@
-import { getInput, setFailed, info, saveState } from '@actions/core';
+import { getInput, setFailed, info, saveState, warning } from '@actions/core';
 import { downloadTool } from '@actions/tool-cache';
 import { exec } from '@actions/exec';
 import { rmRF } from '@actions/io';
@@ -30,7 +30,7 @@ const grpcProbeServices = {
 };
 
 const FACADE_SERVER_NAME = 'restorecommerce_facade_srv';
-
+process.env.RUNNER_TEMP ??= '/tmp';
 const probePath = downloadTool(GRPC_PROBE_URL).then((p) => chmod(p, 0o777).then(() => p));
 
 const grpcHealthProbe = async (container: string) => {
@@ -132,21 +132,28 @@ const setup = async () => {
 
     info('Cloning repository from: ' + system_github_repo);
 
-    await exec('git', ['clone', system_github_repo]);
+    try {
+      await exec('git', ['clone', system_github_repo]);
+    }
+    catch (error: any) {
+      warning(error);
+    }
 
-    info('Bringing up via docker compose');
-
-    const script = !backingOnly ? 'all.bash' : 'backing.bash';
-
+    const script = backingOnly ? 'backing.bash' : 'all.bash';
     const systemConfig = {
       cwd: 'system/docker'
     };
+
+    info('Pulling images via docker compose');
     await exec('bash', [script, 'pull', '-q'], systemConfig);
+    info('Bringing up via docker compose');
     await exec('bash', [script, 'up', '-d'], systemConfig);
     if (restart) {
+      info('Perform restart after warm up');
       await exec('bash', [script, 'restart'], systemConfig);
     }
 
+    info('Checking health status');
     const containers = [];
     await exec('bash', [script, 'ps', '-q'], {
       ...systemConfig,
@@ -157,15 +164,14 @@ const setup = async () => {
     });
 
     const inspect = [];
-    await exec('docker', ['inspect', ...containers.join().trim().split('\n')], {
+    await exec('docker', ['inspect', ...containers.join('').trim().split('\n')], {
       listeners: {
         stdout: (data: Buffer) => inspect.push(data.toString())
       },
       silent: true
     });
 
-    const inspections = JSON.parse(inspect.join());
-
+    const inspections = JSON.parse(inspect.join(''));
     await Promise.all(inspections.map(async (inspect) => {
       const containerName = inspect['Name'].substring(1);
       if (('State' in inspect && 'Health' in inspect['State']) || containerName in grpcProbeServices) {
