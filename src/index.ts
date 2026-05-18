@@ -150,7 +150,9 @@ const setup = async () => {
     await exec('bash', [script, 'up', '-d'], systemConfig);
     if (restart) {
       info('Perform restart after warm up');
+      await exec('sleep 10');
       await exec('bash', [script, 'restart'], systemConfig);
+      await exec('sleep 10');
     }
 
     info('Checking health status');
